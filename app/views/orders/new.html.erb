@@ -1,0 +1,25 @@
+<h2 class="text-2xl font-bold text-yellow-400 mb-6 fade-in">Оформлення замовлення</h2>
+
+<%= form_with model: @order, class: "space-y-4 fade-in" do |f| %>
+  <% if @product %>
+    <p class="text-gray-300">Товар: <strong><%= @product.name %></strong></p>
+    <%= f.hidden_field :product_id, value: @product.id %>
+  <% else %>
+    <div>
+      <%= f.label :product_id, "Товар", class: "block text-gray-300" %>
+      <%= f.collection_select :product_id, @products, :id, :name, {}, {class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"} %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :product_count, "Кількість", class: "block text-gray-300" %>
+    <%= f.number_field :product_count, value: @order.product_count || 1, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
+  </div>
+
+  <div>
+    <%= f.label :address, "Адреса доставки", class: "block text-gray-300" %>
+    <%= f.text_area :address, rows: 3, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
+  </div>
+
+  <%= f.submit "Підтвердити замовлення", class: "bg-yellow-400 text-gray-900 px-6 py-3 rounded-lg hover:bg-yellow-500 transition duration-300" %>
+<% end %>

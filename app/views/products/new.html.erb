@@ -1,0 +1,24 @@
+<h2 class="text-2xl font-bold text-yellow-400 mb-6 fade-in">Додати товар</h2>
+<%= form_with model: @product, class: "space-y-4 fade-in" do |f| %>
+  <div>
+    <%= f.label :name, class: "block text-gray-300" %>
+    <%= f.text_field :name, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
+  </div>
+  <div>
+    <%= f.label :price, class: "block text-gray-300" %>
+    <%= f.number_field :price, step: 0.01, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
+  </div>
+  <div>
+    <%= f.label :description, class: "block text-gray-300" %>
+    <%= f.text_area :description, rows: 4, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
+  </div>
+  <div>
+    <%= f.label :image_url, class: "block text-gray-300" %>
+    <%= f.text_field :image_url, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
+  </div>
+  <div>
+    <%= f.label :category, class: "block text-gray-300" %>
+    <%= f.text_field :category, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
+  </div>
+  <%= f.submit "Створити", class: "bg-yellow-400 text-gray-900 px-6 py-3 rounded-lg hover:bg-yellow-500 transition duration-300" %>
+<% end %>

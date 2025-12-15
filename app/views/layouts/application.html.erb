@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DriedFruitsShop</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+    <style>
+      /* Custom animations */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+      }
+      .hover-scale {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .hover-scale:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      }
+    </style>
+  </head>
+
+  <body class="bg-gray-900 text-gray-100 min-h-screen">
+    <nav class="bg-gray-800 shadow-lg">
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+          <a class="text-2xl font-bold text-yellow-400" href="<%= root_path %>">DriedFruitsShop</a>
+          <div class="flex items-center space-x-4">
+            <a class="text-gray-300 hover:text-yellow-400 transition duration-300" href="<%= products_path %>">Каталог</a>
+            <% if logged_in? %>
+              <span class="text-gray-300">Привіт, <%= current_user.name %></span>
+              <a class="text-gray-300 hover:text-yellow-400 transition duration-300" href="<%= orders_path %>">Мої замовлення</a>
+              <% if current_user.admin? %>
+                <a class="text-gray-300 hover:text-yellow-400 transition duration-300" href="<%= new_product_path %>">Додати товар</a>
+              <% end %>
+              <%= button_to "Вийти", logout_path, method: :delete, class: "text-gray-300 hover:text-yellow-400 transition duration-300", form: {class: "inline"} %>
+            <% else %>
+              <a class="text-gray-300 hover:text-yellow-400 transition duration-300" href="<%= new_user_path %>">Реєстрація</a>
+              <a class="text-gray-300 hover:text-yellow-400 transition duration-300" href="<%= login_path %>">Вхід</a>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+      <% flash.each do |k, v| %>
+        <div class="bg-<%= k == 'notice' ? 'green' : 'red' %>-600 text-white p-4 rounded-lg mb-4 fade-in"><%= v %></div>
+      <% end %>
+
+      <%= yield %>
+    </div>
+
+    <script>
+      // Add fade-in animation to elements on page load
+      document.addEventListener('DOMContentLoaded', () => {
+        const elements = document.querySelectorAll('.fade-in');
+        elements.forEach((el, index) => {
+          el.style.animationDelay = `${index * 0.1}s`;
+        });
+      });
+    </script>
+  </body>
+</html>

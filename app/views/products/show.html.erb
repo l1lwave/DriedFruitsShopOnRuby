@@ -1,0 +1,8 @@
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="col-span-2 bg-gray-800 rounded-lg p-6 fade-in">
+    <h2 class="text-2xl font-bold text-yellow-400 mb-4"><%= @product.name %></h2>
+    <p class="text-yellow-400 font-bold mb-4"><strong>Ціна:</strong> <%= number_to_currency(@product.price, unit: "₴", format: "%n %u") %></p>
+    <p class="text-gray-300 mb-6"><%= @product.description %></p>
+    <%= link_to "Купити", new_order_path(product_id: @product.id), class: "bg-yellow-400 text-gray-900 px-6 py-3 rounded-lg hover:bg-yellow-500 transition duration-300" %>
+  </div>
+</div>
