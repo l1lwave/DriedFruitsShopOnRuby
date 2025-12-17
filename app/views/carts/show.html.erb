@@ -1,0 +1,83 @@
+<div class="max-w-4xl mx-auto py-10 fade-in">
+  <h1 class="text-4xl font-extrabold text-yellow-400 mb-8 text-center">Ваш Кошик</h1>
+
+  <% if @cart.line_items.empty? %>
+    <div class="text-center p-10 bg-gray-800 rounded-lg shadow-xl">
+      <p class="text-gray-400 text-lg mb-4">Ваш кошик порожній. Час додати щось смачненьке!</p>
+      <%= link_to "До Каталогу", products_path, class: "bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-yellow-500 transition duration-300" %>
+    </div>
+  <% else %>
+    
+    <div class="bg-gray-800 p-6 rounded-xl shadow-2xl">
+      
+      <%# Таблиця товарів %>
+      <div class="overflow-x-auto mb-8">
+        <table class="w-full text-left">
+          <thead>
+          <tr class="text-gray-400 border-b border-gray-700">
+            <th class="py-3 pr-2">Товар</th>
+            <th class="py-3 px-2">Ціна (за 1г)</th> 
+            <th class="py-3 px-2">Вага (грам)</th>  <th class="py-3 pl-2">Сума</th>
+            <th class="py-3 pl-2"></th>
+          </tr>
+          </thead>
+          <tbody>
+            <% @cart.line_items.each do |item| %>
+              <tr class="border-b border-gray-700 hover:bg-gray-700/50 transition duration-300">
+                <%# 1. Товар %>
+                <td class="py-4 pr-2">
+                  <%= link_to item.product.name, product_path(item.product), class: "text-gray-100 hover:text-yellow-400 font-semibold" %>
+                </td>
+                
+                <%# 2. Ціна %>
+                <td class="py-4 px-2 text-gray-300">
+                  <%= number_to_currency(item.price, unit: "₴") %>
+                </td>
+                
+                <%# 3. Кількість %>
+                <td class="py-4 px-2 text-gray-300">
+                  <%= item.quantity %>
+                </td>
+                
+                <%# 4. Сума %>
+                <td class="py-4 pl-2 text-yellow-400 font-bold">
+                  <%= number_to_currency(item.quantity * item.price, unit: "₴") %>
+                </td>
+
+                <%# 5. Видалити %>
+                <td class="py-4 pl-2 text-right">
+                  <%= button_to '❌ Видалити', line_item_path(item), method: :delete, 
+                                class: 'text-red-500 hover:text-red-400 text-sm p-2 transition',
+                                data: { turbo_confirm: "Ви впевнені, що хочете видалити #{item.product.name}?" } %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <%# Підсумок та Кнопки Дій %>
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-t border-gray-700 pt-6">
+        
+        <%# Загальний Підсумок %>
+        <div class="text-2xl font-extrabold text-gray-100 mb-4 md:mb-0">
+          Усього: <span class="text-yellow-400 ml-2"><%= number_to_currency(@cart.total_price, unit: "₴") %></span>
+        </div>
+
+        <%# Кнопки дій %>
+        <div class="flex space-x-4">
+          
+          <%# Очистити кошик %>
+          <%= button_to 'Очистити кошик', cart_path(@cart), method: :delete, 
+                        class: 'bg-gray-600 text-gray-100 font-bold py-3 px-6 rounded-lg shadow-md hover:bg-gray-700 transition duration-300',
+                        data: { turbo_confirm: 'Ви впевнені, що хочете видалити всі товари з кошика?' } %>
+                        
+          <%# Оформити замовлення %>
+          <%= link_to 'Оформити замовлення', new_order_path, 
+                      class: 'bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-lg shadow-md hover:bg-yellow-500 transition duration-300' %>
+        </div>
+      </div>
+
+    </div>
+  <% end %>
+</div>

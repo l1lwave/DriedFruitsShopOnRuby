@@ -1,0 +1,57 @@
+<footer class="bg-gray-900 border-t border-gray-800 pt-12 pb-6 mt-20">
+  <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+    
+    <%# Колонка 1: Про нас %>
+    <div class="col-span-1 md:col-span-1">
+      <h3 class="text-yellow-500 font-bold text-xl mb-4 italic">DriedFruits</h3>
+      <p class="text-gray-400 text-sm leading-relaxed">
+        Ми пропонуємо тільки добірні сухофрукти та горіхи з усього світу. Натурально, корисно та дуже смачно.
+      </p>
+    </div>
+
+    <%# Колонка 2: Навігація %>
+    <div>
+      <h4 class="text-white font-bold mb-4 uppercase text-xs tracking-widest">Каталог</h4>
+      <ul class="text-gray-400 text-sm space-y-2">
+        <li><%= link_to "Всі товари", products_path, class: "hover:text-yellow-400 transition" %></li>
+        <li><a href="/products?category_ids[]=8" class="hover:text-yellow-400 transition">Горіхи</a></li>
+        <li><a href="/products?category_ids[]=3" class="hover:text-yellow-400 transition">Сухофрукти</a></li>
+        <li><a href="/products?category_ids[]=9" class="hover:text-yellow-400 transition">Набори</a></li>
+      </ul>
+    </div>
+
+    <%# Колонка 3: Корисне %>
+    <div>
+      <h4 class="text-white font-bold mb-4 uppercase text-xs tracking-widest">Допомога</h4>
+      <ul class="text-gray-400 text-sm space-y-2">
+        <li><a href="#" class="hover:text-yellow-400 transition">Доставка та оплата</a></li>
+        <li><a href="#" class="hover:text-yellow-400 transition">Про нас</a></li>
+        <li><a href="#" class="hover:text-yellow-400 transition">Контакти</a></li>
+      </ul>
+    </div>
+
+    <%# Колонка 4: Контакти %>
+    <div>
+      <h4 class="text-white font-bold mb-4 uppercase text-xs tracking-widest">Зв'язок</h4>
+      <ul class="text-gray-400 text-sm space-y-3">
+        <li class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+          </svg>
+          +38 (099) 123-45-67
+        </li>
+        <li class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          </svg>
+          Україна, м. Івано-Франківськ
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <%# Копірайт %>
+  <div class="max-w-6xl mx-auto px-4 border-t border-gray-800 mt-12 pt-6 text-center text-gray-500 text-xs">
+    <p>&copy; <%= Time.now.year %> DriedFruits Shop. Всі права захищені.</p>
+  </div>
+</footer>

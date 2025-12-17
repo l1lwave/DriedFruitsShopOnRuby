@@ -1,8 +1,177 @@
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-  <div class="col-span-2 bg-gray-800 rounded-lg p-6 fade-in">
-    <h2 class="text-2xl font-bold text-yellow-400 mb-4"><%= @product.name %></h2>
-    <p class="text-yellow-400 font-bold mb-4"><strong>Ціна:</strong> <%= number_to_currency(@product.price, unit: "₴", format: "%n %u") %></p>
-    <p class="text-gray-300 mb-6"><%= @product.description %></p>
-    <%= link_to "Купити", new_order_path(product_id: @product.id), class: "bg-yellow-400 text-gray-900 px-6 py-3 rounded-lg hover:bg-yellow-500 transition duration-300" %>
+<div class="max-w-6xl mx-auto py-10 fade-in">
+  
+  <%# ---------------------- 1. ОСНОВНА СЕКЦІЯ ТОВАРУ ---------------------- %>
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-10 bg-gray-800 p-8 rounded-2xl shadow-2xl">
+
+    <%# --- КОЛОНКА 1: ЗОБРАЖЕННЯ (Ширина 5/12) --- %>
+    <div class="md:col-span-5 relative">
+      <% if @product.image_url.present? %>
+        <img src="<%= @product.image_url %>" alt="<%= @product.name %>" 
+             class="w-full h-96 object-cover rounded-xl shadow-lg border border-gray-700">
+      <% else %>
+        <div class="w-full h-96 flex items-center justify-center bg-gray-700 rounded-xl text-gray-400">
+          Зображення недоступне
+        </div>
+      <% end %>
+    </div>
+
+    <%# --- КОЛОНКА 2: ДЕТАЛІ ТА ДІЇ (Ширина 7/12) --- %>
+    <div class="md:col-span-7 flex flex-col justify-between">
+      
+      <div>
+        <%# Заголовок та Категорія %>
+        <h1 class="text-4xl font-extrabold text-yellow-400 mb-2"><%= @product.name %></h1>
+        <p class="text-lg text-gray-400 mb-6">
+          Категорія: 
+          <% if @product.category.present? %>
+            <%= link_to @product.category.name, category_path(@product.category), class: "text-gray-300 hover:text-yellow-400 font-medium" %>
+          <% else %>
+            Не вказано
+          <% end %>
+        </p>
+        
+        <%# Ціна та Доступність %>
+        <div class="border-t border-b border-gray-700 py-4 mb-6">
+          <p class="text-5xl font-extrabold text-green-400 mb-2">
+            <%= number_to_currency(@product.price, unit: "₴ / за 100 г", format: "%n %u") %>
+          </p>
+          <p class="text-gray-500">
+            В наявності: <span class="text-green-500 font-semibold">Готово до відправлення</span>
+          </p>
+        </div>
+        
+        <%# Коротка інфо %>
+        <ul class="space-y-2 text-gray-300 mb-8">
+          <li>✨ Натуральний продукт</li>
+          <li>📦 Відправляємо щодня</li>
+          <li>🚚 Безкоштовна доставка від 1000 ₴</li>
+        </ul>
+
+      </div>
+
+      <%# 🌟 ФОРМА ДЛЯ ВИБОРУ ВАГИ 🌟 %>
+      <%= form_with url: line_items_path, method: :post, local: true, class: "flex items-end space-x-4 mt-auto" do |form| %>
+        
+        <%= form.hidden_field :product_id, value: @product.id %>
+
+        <%# Поле вибору кількості (ваги) %>
+        <div class="flex flex-col">
+          <%= form.label :quantity_grams, 'Вага (у грамах)', class: "text-sm font-medium text-gray-400 mb-1" %>
+          <%= form.number_field :quantity_grams, 
+                                value: 100, # Значення за замовчуванням
+                                min: 50,    # Мінімальна вага
+                                step: 50,   # Крок (можна вибрати 50, 100, 150...)
+                                required: true, 
+                                class: "bg-gray-700 text-gray-100 p-3 rounded-xl border border-gray-600 focus:border-yellow-400 focus:ring focus:ring-yellow-400 focus:ring-opacity-50 w-32 shadow-inner" %>
+        </div>
+
+        <%# Кнопка "Додати" %>
+        <%= form.submit "🛒 Додати в кошик", 
+                        class: "bg-yellow-600 text-gray-900 px-8 py-3 rounded-xl hover:bg-yellow-500 transition duration-300 font-bold shadow-lg transform hover:scale-105 cursor-pointer" %>
+      <% end %>
+      
+      <%# Адмін-кнопка %>
+      <% if current_user&.admin? %>
+        <%= link_to "✏️ Редагувати", edit_product_path(@product), 
+            class: "bg-gray-700 text-gray-300 px-4 py-3 rounded-xl hover:bg-gray-600 transition duration-300 text-sm font-medium ml-4 mt-4" %>
+      <% end %>
+
+    </div>
+  </div>
+
+  <%# ---------------------- 2. ДЕТАЛЬНИЙ ОПИС ---------------------- %>
+<div class="mt-10 bg-gray-800 p-8 rounded-2xl shadow-2xl fade-in">
+  <h3 class="text-2xl font-bold text-yellow-400 mb-4 border-b border-gray-700 pb-2">Детальний опис</h3>
+  <div class="text-gray-300 leading-relaxed space-y-4">
+    <%= simple_format(@product.description) %>
+  </div>
+</div>
+
+<%# ---------------------- 3. ВІДГУКИ ТА РЕЙТИНГИ ---------------------- %>
+<div class="mt-10 bg-gray-800 p-8 rounded-2xl shadow-2xl fade-in">
+  <div class="border-b border-gray-700 pb-4 mb-6 flex justify-between items-center">
+    <h3 class="text-2xl font-bold text-yellow-400">Відгуки (<%= @product.reviews.count %>)</h3>
+    
+    <%# Відображення середнього рейтингу %>
+    <div class="text-xl font-bold text-gray-300 flex items-center">
+      Рейтинг: 
+      <span class="text-yellow-400 ml-2">
+        <% if @product.reviews.any? %>
+          <%= '⭐' * @product.average_rating.round %> (<%= @product.average_rating %> / 5)
+        <% else %>
+          (Немає рейтингу)
+        <% end %>
+      </span>
+    </div>
+  </div>
+  
+  <%# --- ФОРМА ДОДАВАННЯ ВІДГУКУ --- %>
+  <% if logged_in? %>
+    <% if current_user.reviews.find_by(product_id: @product.id).nil? %>
+      <div class="bg-gray-700 p-5 rounded-lg mb-8">
+        <h4 class="text-xl font-semibold text-yellow-400 mb-4">Написати відгук:</h4>
+        
+        <%= form_with model: [@product, @product.reviews.build], local: true, class: "space-y-4" do |form| %>
+          
+          <%# Поле вибору рейтингу (зірки) %>
+          <div class="flex items-center space-x-2">
+            <%= form.label :rating, 'Ваша оцінка:', class: "text-gray-300 font-medium" %>
+            <%= form.select :rating, options_for_select((1..5).to_a.reverse, 5), {}, 
+                            { class: "bg-gray-800 border border-gray-600 rounded-lg p-2 text-gray-100" } %>
+            <span class="text-xl text-yellow-400">⭐</span>
+          </div>
+          
+          <%# Поле опису відгуку %>
+          <%= form.text_area :body, rows: 4, placeholder: "Поділіться своїм враженням про товар...", 
+                             class: "w-full bg-gray-800 border border-gray-600 rounded-lg p-3 text-gray-100 focus:border-yellow-400" %>
+          
+          <%= form.submit "Відправити відгук", 
+                          class: "bg-yellow-600 text-gray-900 px-6 py-2 rounded-lg hover:bg-yellow-500 transition duration-300 font-semibold cursor-pointer" %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="p-4 bg-yellow-900/50 rounded-lg text-yellow-100 mb-8">
+        Ви вже залишили відгук про цей товар.
+      </div>
+    <% end %>
+  <% else %>
+    <div class="p-4 bg-gray-700 rounded-lg text-gray-400 mb-8">
+      <%= link_to "Увійдіть", login_path, class: "text-yellow-400 hover:text-yellow-500 font-semibold" %> щоб залишити відгук.
+    </div>
+  <% end %>
+
+  <%# --- СПИСОК ІСНУЮЧИХ ВІДГУКІВ --- %>
+  <div class="space-y-6">
+    <% @product.reviews.includes(:user).order(created_at: :desc).each do |review| %>
+      <div class="bg-gray-700 p-4 rounded-lg shadow-md border-l-4 border-yellow-500">
+        
+        <div class="flex justify-between items-start mb-2">
+          <%# Автор та Дата %>
+          <div class="text-gray-300">
+            <span class="font-bold"><%= review.user.name %></span>
+            <span class="text-sm text-gray-500 ml-2"><%= time_ago_in_words(review.created_at) %> тому</span>
+          </div>
+          
+          <%# Рейтинг %>
+          <div class="text-xl text-yellow-400">
+            <%= '⭐' * review.rating %>
+          </div>
+        </div>
+        
+        <%# Тіло відгуку %>
+        <p class="text-gray-200 mb-3"><%= review.body %></p>
+        
+        <%# Кнопка видалення (Тільки для автора або адміна) %>
+        <% if current_user == review.user || current_user&.admin? %>
+          <%= button_to "❌ Видалити", product_review_path(@product, review), method: :delete,
+                        class: 'text-red-400 hover:text-red-500 text-sm transition mt-2',
+                        data: { turbo_confirm: 'Ви впевнені, що хочете видалити цей відгук?' } %>
+        <% end %>
+      </div>
+    <% end %>
+    
+    <% if @product.reviews.empty? %>
+      <p class="text-gray-500 text-center py-4">Будьте першим, хто залишить відгук!</p>
+    <% end %>
   </div>
 </div>

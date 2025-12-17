@@ -1,0 +1,70 @@
+<div class="max-w-6xl mx-auto py-10 px-4">
+  <h1 class="text-3xl font-bold text-yellow-500 mb-6">Адмін-панель: Замовлення</h1>
+
+  <div class="bg-gray-800 rounded-lg overflow-hidden shadow-xl">
+    <table class="w-full text-left">
+      <thead class="bg-gray-700 text-yellow-400">
+        <tr>
+          <th class="p-4">ID</th>
+          <th class="p-4">Клієнт та Товари</th> <%# Змінено заголовок %>
+          <th class="p-4 text-center">Дата</th>
+          <th class="p-4 text-right">Сума</th>
+          <th class="p-4 text-center">Статус</th>
+          <th class="p-4 text-center">Дії</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-700 text-gray-300">
+        <% @orders.each do |order| %>
+          <tr class="hover:bg-gray-750 align-top"> <%# Додано align-top для гарного вигляду при довгому списку %>
+            <td class="p-4 font-mono text-yellow-500">#<%= order.id %></td>
+            
+            <td class="p-4">
+              <div class="font-bold text-white text-lg"><%= order.full_name %></div>
+              <div class="text-gray-400 text-sm mb-3"><%= order.phone %></div>
+              
+              <%# --- БЛОК ТОВАРІВ --- %>
+              <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700 max-w-xs">
+                <p class="text-[10px] uppercase text-yellow-500 font-bold mb-2 tracking-wider">Склад замовлення:</p>
+                <ul class="space-y-1">
+                  <% order.line_items.each do |item| %>
+                    <li class="text-xs flex justify-between gap-4">
+                      <span class="text-gray-300">○ <%= item.product.name %></span>
+                      <span class="text-yellow-400 font-bold whitespace-nowrap">x<%= item.quantity %></span>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            </td>
+
+            <td class="p-4 text-sm text-center">
+              <%= order.created_at.strftime("%d.%m.%Y") %><br>
+              <span class="text-gray-500 text-xs"><%= order.created_at.strftime("%H:%M") %></span>
+            </td>
+
+            <td class="p-4 text-right font-bold text-white whitespace-nowrap">
+              <%= number_to_currency(order.total_price, unit: "₴", format: "%n %u") %>
+            </td>
+
+            <td class="p-4 text-center">
+              <span class="px-2 py-1 rounded text-[10px] font-bold uppercase bg-gray-700 text-yellow-500 border border-yellow-500/30">
+                <%= order.status %>
+              </span>
+            </td>
+
+            <td class="p-4">
+              <div class="flex flex-col gap-2 items-center">
+                <%= link_to "Деталі", admin_order_path(order), 
+                    class: "w-full text-center py-1 text-xs bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white rounded transition" %>
+                
+                <%= button_to "Видалити", admin_order_path(order), 
+                    method: :delete, 
+                    form: { data: { turbo_confirm: "Видалити замовлення ##{order.id}?" } }, 
+                    class: "w-full text-[10px] text-red-500/50 hover:text-red-500 transition uppercase tracking-tighter" %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+<div class="max-w-4xl mx-auto py-10 fade-in">
+  <h1 class="text-3xl font-bold text-yellow-400 mb-8">Запити на зворотній дзвінок</h1>
+  
+  <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
+    <p class="text-lg text-gray-300">Всього запитів: <span class="font-bold text-yellow-400"><%= @requests.count %></span></p>
+    
+    <%# Кнопка для очищення всього списку %>
+    <%= button_to "🗑️ Очистити весь список", admin_callback_request_path(id: 0), method: :delete,
+                  class: 'bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300 font-medium',
+                  data: { turbo_confirm: 'Ви впевнені? Це видалить ВСІ запити безповоротно!' } %>
+  </div>
+
+  <% if @requests.empty? %>
+    <div class="text-center p-10 bg-gray-800 rounded-lg shadow-xl">
+      <p class="text-gray-400 text-lg">Наразі немає нових запитів на зворотній дзвінок.</p>
+    </div>
+  <% else %>
+    <div class="space-y-4">
+      <% @requests.each do |request| %>
+        <div class="bg-gray-800 p-4 rounded-lg shadow-lg border-l-4 border-yellow-500 flex justify-between items-center">
+          
+          <%# Номер телефону %>
+          <div>
+            <p class="text-gray-300 text-sm">Номер телефону:</p>
+            <p class="text-2xl font-bold text-yellow-400">
+              <%= request.phone_number %>
+            </p>
+          </div>
+          
+          <%# Час відправки %>
+          <div class="text-right">
+            <p class="text-gray-500 text-sm">Час відправки:</p>
+            <p class="text-gray-300 font-medium">
+              <%= l(request.created_at, format: :short) %> 
+              (<%= time_ago_in_words(request.created_at) %> тому)
+            </p>
+          </div>
+          
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

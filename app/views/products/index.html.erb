@@ -1,22 +1,192 @@
-<h1 class="text-3xl font-bold text-yellow-400 mb-8 fade-in">Каталог сухофруктів</h1>
+<div class="container mx-auto px-4 py-8">
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-  <% @products.each do |p| %>
-    <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover-scale fade-in">
-      <% if p.image_url.present? %>
-        <img src="<%= p.image_url %>" class="w-full h-48 object-cover" alt="<%= p.name %>">
-      <% end %>
-      <div class="p-6 flex flex-col">
-        <h5 class="text-xl font-semibold text-gray-100 mb-2"><%= link_to p.name, product_path(p), class: "hover:text-yellow-400 transition duration-300" %></h5>
-        <p class="text-gray-400 mb-4 flex-grow"><%= truncate(p.description, length: 120) %></p>
-        <p class="text-yellow-400 font-bold mb-4"><strong>Ціна:</strong> <%= number_to_currency(p.price, unit: "₴", format: "%n %u") %></p>
-        <div class="flex space-x-2">
-          <%= link_to "Купити", new_order_path(product_id: p.id), class: "bg-yellow-400 text-gray-900 px-4 py-2 rounded hover:bg-yellow-500 transition duration-300" %>
-          <% if current_user&.admin? %>
-            <%= link_to "Редагувати", edit_product_path(p), class: "bg-gray-600 text-gray-100 px-4 py-2 rounded hover:bg-gray-700 transition duration-300" %>
-          <% end %>
+  <div class="mb-10 fade-in">
+    <h2 class="text-3xl font-bold text-gray-200 mb-4 text-center">Гарячі пропозиції</h2>
+    
+    <div id="promo-slider" class="overflow-hidden relative rounded-xl shadow-2xl">
+      <div class="flex transition-transform duration-500 ease-in-out" id="slider-container">
+        <%# 1. Банер - Приклад 1 %>
+        <div class="w-full flex-shrink-0 h-48 md:h-64 bg-yellow-600 flex items-center justify-center text-gray-900 font-bold text-2xl" data-slide="0">
+          СУПЕР ЗНИЖКА: Набір "Енергія" - 20%!
+        </div>
+        <%# 2. Банер - Приклад 2 %>
+        <div class="w-full flex-shrink-0 h-48 md:h-64 bg-green-700 flex items-center justify-center text-gray-100 font-bold text-2xl" data-slide="1">
+          НОВИНКА: Органічний інжир з Туреччини
+        </div>
+        <%# 3. Банер - Приклад 3 %>
+        <div class="w-full flex-shrink-0 h-48 md:h-64 bg-red-700 flex items-center justify-center text-gray-100 font-bold text-2xl" data-slide="2">
+          ДОСТАВКА БЕЗКОШТОВНО від 1000 ₴
         </div>
       </div>
+
+      <%# Кнопки навігації (для демонстрації) %>
+      <button onclick="prevSlide()" class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-gray-900 bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-80 transition z-10">
+        &lt;
+      </button>
+      <button onclick="nextSlide()" class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-gray-900 bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-80 transition z-10">
+        &gt;
+      </button>
+    </div>
+  </div>
+
+
+
+  <div class="flex flex-col md:flex-row gap-8">
+    
+    <%# --- ЛІВА КОЛОНКА: ФІЛЬТРИ та СОРТУВАННЯ (Ширина 1/4) --- %>
+    <aside class="md:w-1/4 p-4 bg-gray-800 rounded-lg shadow-xl h-full sticky top-4 fade-in">
+      <h3 class="text-2xl font-bold text-yellow-400 mb-6">Фільтри</h3>
+      
+      <%= form_with url: products_path, method: :get, local: true, class: "space-y-6" do %>
+
+        <%# 1. Сортування %>
+        <div class="border-b border-gray-700 pb-4">
+          <label class="block text-lg font-semibold text-gray-200 mb-2">Сортувати за:</label>
+          <%= select_tag :sort_by, options_for_select([
+            ['За популярністю', 'popular'],
+            ['Ціна: від низької до високої', 'price_asc'],
+            ['Ціна: від високої до низької', 'price_desc'],
+            ['Новинки', 'newest']
+          ], params[:sort_by]), class: "w-full p-2 bg-gray-700 rounded text-gray-100 focus:ring-yellow-400 focus:border-yellow-400" %>
+        </div>
+
+        <%# 2. Фільтр за Категоріями %>
+        <div class="border-b border-gray-700 pb-4">
+          <label class="block text-lg font-semibold text-gray-200 mb-2">Категорії</label>
+          <div class="space-y-2 max-h-48 overflow-y-auto pr-2">
+            <%# Припускаємо, що у вас є @categories, встановлені в контролері %>
+            <% Category.all.each do |category| %>
+              <div class="flex items-center">
+                <%= check_box_tag "category_ids[]", category.id, params[:category_ids]&.include?(category.id.to_s), id: "category_#{category.id}", class: "h-4 w-4 text-yellow-500 rounded border-gray-600 focus:ring-yellow-500 bg-gray-700" %>
+                <label for="category_<%= category.id %>" class="ml-2 text-gray-300 hover:text-yellow-400 cursor-pointer text-sm">
+                  <%= category.name %>
+                </label>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <%# 3. Фільтр за Ціною (діапазон) %>
+        <div class="pb-4">
+          <label class="block text-lg font-semibold text-gray-200 mb-3">Діапазон цін (₴)</label>
+          <div class="flex space-x-2 items-center">
+            
+            <%= number_field_tag :min_price, params[:min_price], 
+              placeholder: "Мін.", 
+              class: "w-1/2 p-2 bg-gray-700 rounded text-gray-100 focus:ring-yellow-400 focus:border-yellow-400" %>
+            
+            <span class="text-gray-400">–</span>
+            
+            <%= number_field_tag :max_price, params[:max_price], 
+              placeholder: "Макс.", 
+              class: "w-1/2 p-2 bg-gray-700 rounded text-gray-100 focus:ring-yellow-400 focus:border-yellow-400" %>
+          </div>
+        </div>
+        
+        <%# Кнопка застосування фільтрів %>
+        <%= submit_tag "Застосувати фільтри", class: "w-full bg-yellow-600 text-gray-900 font-bold py-2 rounded-lg hover:bg-yellow-500 transition duration-300 cursor-pointer" %>
+        
+        <%# Кнопка скидання фільтрів %>
+        <%= link_to "Скинути фільтри", products_path, class: "block text-center mt-2 text-gray-500 hover:text-yellow-400" %>
+        
+      <% end %>
+    </aside>
+
+    <%# --- ПРАВА КОЛОНКА: КАТАЛОГ ТОВАРІВ (Ширина 3/4) --- %>
+<main class="md:w-3/4">
+  <h1 class="text-3xl font-bold text-yellow-400 mb-8 fade-in">Каталог сухофруктів</h1>
+  
+  <% if @products.empty? %>
+    <div class="text-center p-10 bg-gray-800 rounded-lg shadow-xl">
+      <p class="text-gray-400 text-lg">На жаль, за вашим запитом не знайдено жодного товару.</p>
+      <%= link_to "Показати всі товари", products_path, class: "mt-4 inline-block text-yellow-400 hover:text-yellow-500" %>
+    </div>
+  <% else %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @products.each do |p| %>
+        
+        <%# Контейнер плитки: відповідає за тінь та hover-анімацію %>
+        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover-scale fade-in border border-gray-700 hover:border-yellow-600 transition duration-300">
+          
+          <%# 1. ЗОБРАЖЕННЯ: ОБЕРНУТЕ В ПОСИЛАННЯ (Збільшено висоту h-56) %>
+          <%= link_to product_path(p) do %>
+            <% if p.image_url.present? %>
+              <img src="<%= p.image_url %>" class="w-full h-56 object-cover" alt="<%= p.name %>">
+            <% end %>
+          <% end %>
+          
+          <div class="p-4 flex flex-col">
+            
+            <%# Назва товару (Окреме посилання, щоб не було вкладених посилань) %>
+            <h5 class="text-xl font-semibold text-gray-100 mb-1 truncate">
+              <%= link_to p.name, product_path(p), class: "hover:text-yellow-400 transition duration-300" %>
+            </h5>
+            
+            <%# Категорія %>
+            <p class="text-sm text-gray-500 mb-2">Категорія: <%= p.category.name if p.category %></p> 
+            
+            <%# Ціна %>
+            <p class="text-yellow-400 font-bold text-2xl mb-4">
+              <%= number_to_currency(p.price, unit: "₴ / за 100 г", format: "%n %u") %>
+            </p>
+            
+            <%# 🌟 СЕКЦІЯ ДІЙ (Кнопки) 🌟 %>
+            <div class="flex space-x-2 mt-auto">
+              
+              <%# КНОПКА ПЕРЕХОДУ НА СТОРІНКУ (замість додавання) %>
+              <%= link_to "Детальніше", product_path(p),
+                  class: "bg-yellow-600 text-gray-900 px-4 py-2 rounded-lg hover:bg-yellow-500 transition duration-300 text-sm font-medium" %>
+
+              <%# КНОПКА РЕДАГУВАННЯ (Тільки для адміна) %>
+              <% if current_user&.admin? %>
+                <%= link_to "Редагувати", edit_product_path(p), 
+                            class: "bg-gray-700 text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-300 text-sm font-medium" %>
+              <% end %>
+
+            </div>
+            
+          </div>
+        </div>
+      <% end %>
     </div>
   <% end %>
+</main>
+  </div>
 </div>
+
+
+<script>
+  let currentSlide = 0;
+  const sliderContainer = document.getElementById('slider-container');
+  const slides = sliderContainer ? sliderContainer.querySelectorAll('[data-slide]') : [];
+  
+  if (slides.length > 0) {
+    const totalSlides = slides.length;
+
+    function updateSlider() {
+      if (sliderContainer) {
+        sliderContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+      }
+    }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % totalSlides;
+      updateSlider();
+    }
+
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+      updateSlider();
+    }
+    
+    // Додавання глобальних функцій для кнопок (для ERB-кнопок)
+    window.nextSlide = nextSlide;
+    window.prevSlide = prevSlide;
+    
+    // Автопрокрутка (за бажанням)
+    setInterval(nextSlide, 5000); // Змінювати слайд кожні 5 секунд
+    
+    // Встановлення початкового розміру (забезпечує, що flex працює)
+    updateSlider();
+  }
+</script>

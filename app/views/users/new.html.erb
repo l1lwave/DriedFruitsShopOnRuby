@@ -1,20 +1,55 @@
-<h2 class="text-2xl font-bold text-yellow-400 mb-6 fade-in">Реєстрація</h2>
-<%= form_with model: @user, class: "space-y-4 fade-in" do |f| %>
-  <div>
-    <%= f.label :email, class: "block text-gray-300" %>
-    <%= f.email_field :email, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
+<div class="max-w-md mx-auto py-10 fade-in">
+  <h1 class="text-4xl font-extrabold text-yellow-400 mb-8 text-center">Реєстрація нового користувача</h1>
+
+  <%= form_with(model: @user, class: "bg-gray-800 p-8 rounded-xl shadow-2xl space-y-5") do |f| %>
+
+    <% if @user.errors.any? %>
+      <div class="bg-red-700 text-white p-4 rounded-lg mb-6">
+        <h2 class="font-bold mb-2"><%= pluralize(@user.errors.count, "помилка") %>:</h2>
+        <ul>
+          <% @user.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= f.label :name, "Ім'я", class: "block text-sm font-medium text-gray-400 mb-2" %>
+      <%= f.text_field :name, 
+                       class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100",
+                       placeholder: "Ваше ім'я" %>
+    </div>
+
+    <div>
+      <%= f.label :email, "Електронна пошта", class: "block text-sm font-medium text-gray-400 mb-2" %>
+      <%= f.email_field :email, 
+                        class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100",
+                        placeholder: "example@email.com" %>
+    </div>
+
+    <div>
+      <%= f.label :password, "Пароль", class: "block text-sm font-medium text-gray-400 mb-2" %>
+      <%= f.password_field :password, 
+                           class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100",
+                           placeholder: "Введіть пароль" %>
+    </div>
+
+    <div>
+      <%= f.label :password_confirmation, "Підтвердження пароля", class: "block text-sm font-medium text-gray-400 mb-2" %>
+      <%= f.password_field :password_confirmation, 
+                           class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100",
+                           placeholder: "Повторіть пароль" %>
+    </div>
+
+    <div class="flex justify-end pt-2">
+      <%= f.submit "Зареєструватись", class: "bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-yellow-500 transition duration-300 cursor-pointer" %>
+    </div>
+
+  <% end %>
+
+  <div class="text-center mt-4 text-sm">
+    <span class="text-gray-400">Вже маєте акаунт?</span>
+    <%= link_to "Увійти", login_path, class: "text-yellow-400 hover:text-yellow-500 font-medium ml-1" %>
   </div>
-  <div>
-    <%= f.label :name, class: "block text-gray-300" %>
-    <%= f.text_field :name, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
-  </div>
-  <div>
-    <%= f.label :password, class: "block text-gray-300" %>
-    <%= f.password_field :password, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
-  </div>
-  <div>
-    <%= f.label :password_confirmation, class: "block text-gray-300" %>
-    <%= f.password_field :password_confirmation, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
-  </div>
-  <%= f.submit "Зареєструватись", class: "bg-yellow-400 text-gray-900 px-6 py-3 rounded-lg hover:bg-yellow-500 transition duration-300" %>
-<% end %>
+</div>

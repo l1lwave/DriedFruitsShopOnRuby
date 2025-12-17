@@ -3,14 +3,13 @@
   <head>
     <title>DriedFruitsShop</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Tailwind CSS CDN -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
     <style>
-      /* Custom animations */
+      /* (Ваші стилі залишилися без змін) */
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
@@ -29,28 +28,53 @@
   </head>
 
   <body class="bg-gray-900 text-gray-100 min-h-screen">
-    <nav class="bg-gray-800 shadow-lg">
-      <div class="container mx-auto px-4 py-4">
+
+    <nav class="bg-gray-800 shadow-xl border-b border-gray-700">
+      <div class="container mx-auto px-4 py-3">
         <div class="flex justify-between items-center">
-          <a class="text-2xl font-bold text-yellow-400" href="<%= root_path %>">DriedFruitsShop</a>
-          <div class="flex items-center space-x-4">
-            <a class="text-gray-300 hover:text-yellow-400 transition duration-300" href="<%= products_path %>">Каталог</a>
+          <a class="text-3xl font-extrabold text-yellow-400 tracking-wider" href="<%= root_path %>">DriedFruitsShop</a>
+          
+          <div class="flex items-center space-x-3">
+            
             <% if logged_in? %>
-              <span class="text-gray-300">Привіт, <%= current_user.name %></span>
-              <a class="text-gray-300 hover:text-yellow-400 transition duration-300" href="<%= orders_path %>">Мої замовлення</a>
-              <% if current_user.admin? %>
-                <a class="text-gray-300 hover:text-yellow-400 transition duration-300" href="<%= new_product_path %>">Додати товар</a>
-              <% end %>
-              <%= button_to "Вийти", logout_path, method: :delete, class: "text-gray-300 hover:text-yellow-400 transition duration-300", form: {class: "inline"} %>
-            <% else %>
-              <a class="text-gray-300 hover:text-yellow-400 transition duration-300" href="<%= new_user_path %>">Реєстрація</a>
-              <a class="text-gray-300 hover:text-yellow-400 transition duration-300" href="<%= login_path %>">Вхід</a>
+              <%# 1. КОШИК %>
+              <a class="px-3 py-2 rounded-lg text-sm font-medium bg-yellow-600 hover:bg-yellow-500 transition duration-300" 
+                 href="<%= cart_path(current_user.cart || current_user.create_cart) %>">Кошик</a>
+
+              <%# 2. ПРОФІЛЬ %>
+              <a class="px-3 py-2 rounded-lg text-sm font-medium bg-yellow-600 hover:bg-yellow-500 transition duration-300" 
+                 href="<%= edit_user_path(current_user) %>">Профіль</a> 
+
+              
+            <% else %> 
+              <%# ГІСТЬ %>
+              <a class="px-3 py-2 rounded-lg text-sm font-medium bg-yellow-600 hover:bg-yellow-500 transition duration-300" 
+                 href="<%= login_path %>">Увійти</a>
             <% end %>
           </div>
         </div>
       </div>
     </nav>
 
+    <nav class="bg-gray-700 shadow-inner">
+      <div class="container mx-auto px-4 py-2">
+        <div class="flex items-center space-x-6">
+          <a class="text-gray-200 hover:text-yellow-400 font-medium transition duration-300" href="<%= products_path %>">Каталог</a>
+          
+          <% if logged_in? %>
+            <a class="text-gray-200 hover:text-yellow-400 font-medium transition duration-300" href="<%= orders_path %>">Мої Замовлення</a>
+            
+            <% if current_user.admin? %>
+              <a class="text-red-400 hover:text-red-300 font-bold transition duration-300" href="<%= new_product_path %>">Додати товар</a>
+              <a class="text-red-400 hover:text-red-300 font-bold transition duration-300" href="<%= admin_callback_requests_path %>">Запити на дзвінок</a>
+              <a class="text-red-400 hover:text-red-300 font-bold transition duration-300" href="<%= admin_orders_path %>">Замовлення</a>
+
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+    
     <div class="container mx-auto px-4 py-8">
       <% flash.each do |k, v| %>
         <div class="bg-<%= k == 'notice' ? 'green' : 'red' %>-600 text-white p-4 rounded-lg mb-4 fade-in"><%= v %></div>
@@ -59,14 +83,64 @@
       <%= yield %>
     </div>
 
+    <%# ------------------------- ВІДЖЕТ ЗВОРОТНОГО ДЗВІНКА -------------------------%>
+    <div class="fixed bottom-6 right-6" style="z-index: 9999;" data-controller="callback-modal">
+      
+      <%# Кнопка-віджет %>
+      <button id="callback-widget-btn" 
+              class="w-16 h-16 rounded-full bg-yellow-600 text-gray-900 shadow-2xl flex items-center justify-center 
+                     hover:bg-yellow-500 transition duration-300 transform hover:scale-105"
+              data-action="click->callback-modal#toggle"
+              data-callback-modal-target="button">
+        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+        </svg>
+      </button>
+      
+      <div id="callback-modal" 
+          style="z-index: 9999;" 
+          class="absolute bottom-full right-0 mb-4 w-72 bg-gray-800 rounded-lg shadow-2xl p-4 transform origin-bottom-right transition-transform duration-300"
+          data-callback-modal-target="modal">
+          
+          <div id="callback_modal_content">
+            <%= render 'callback_requests/form', request: CallbackRequest.new %>
+          </div>
+          
+      </div>
+    </div>
+
+
+    <%= render 'layouts/footer' %>
+
     <script>
-      // Add fade-in animation to elements on page load
       document.addEventListener('DOMContentLoaded', () => {
         const elements = document.querySelectorAll('.fade-in');
         elements.forEach((el, index) => {
           el.style.animationDelay = `${index * 0.1}s`;
         });
       });
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const elements = document.querySelectorAll('.fade-in');
+        elements.forEach((el, index) => {
+          el.style.animationDelay = `${index * 0.1}s`;
+        });
+      });
+      
+      function formatPhoneNumber(input) {
+        let value = input.value.replace(/\D/g, ''); 
+        
+        if (value.length > 0 && !value.startsWith('38')) {
+            value = '380' + value;
+        }
+        if (value.length > 0) {
+            value = '+' + value;
+        }
+
+        input.value = value;
+      }
+
     </script>
+    
   </body>
 </html>

@@ -1,24 +1,101 @@
-<h2 class="text-2xl font-bold text-yellow-400 mb-6 fade-in">Додати товар</h2>
-<%= form_with model: @product, class: "space-y-4 fade-in" do |f| %>
-  <div>
-    <%= f.label :name, class: "block text-gray-300" %>
-    <%= f.text_field :name, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
-  </div>
-  <div>
-    <%= f.label :price, class: "block text-gray-300" %>
-    <%= f.number_field :price, step: 0.01, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
-  </div>
-  <div>
-    <%= f.label :description, class: "block text-gray-300" %>
-    <%= f.text_area :description, rows: 4, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
-  </div>
-  <div>
-    <%= f.label :image_url, class: "block text-gray-300" %>
-    <%= f.text_field :image_url, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
-  </div>
-  <div>
-    <%= f.label :category, class: "block text-gray-300" %>
-    <%= f.text_field :category, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
-  </div>
-  <%= f.submit "Створити", class: "bg-yellow-400 text-gray-900 px-6 py-3 rounded-lg hover:bg-yellow-500 transition duration-300" %>
-<% end %>
+<div class="max-w-xl mx-auto py-10 fade-in">
+  <h1 class="text-4xl font-extrabold text-yellow-400 mb-8 text-center">Додати новий товар</h1>
+
+  <%= form_with(model: @product, class: "bg-gray-800 p-8 rounded-xl shadow-2xl space-y-5") do |f| %>
+
+    <% if @product.errors.any? %>
+      <div class="bg-red-700 text-white p-4 rounded-lg mb-6">
+        <h2 class="font-bold mb-2"><%= pluralize(@product.errors.count, "помилка") %> завадили збереженню товару:</h2>
+        <ul>
+          <% @product.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div>
+      <%= f.label :name, "Назва товару", class: "block text-sm font-medium text-gray-400 mb-2" %>
+      <%= f.text_field :name, class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100", placeholder: "Наприклад, Інжир сушений" %>
+    </div>
+
+    <div>
+      <%= f.label :price, "Ціна (за 100 г)", class: "block text-sm font-medium text-gray-400 mb-2" %>
+      <%= f.number_field :price, step: 0.01, class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100", placeholder: "Наприклад, 249.99" %>
+    </div>
+
+    <div>
+      <%= f.label :description, "Опис", class: "block text-sm font-medium text-gray-400 mb-2" %>
+      <%= f.text_area :description, rows: 4, class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100", placeholder: "Детальний опис товару" %>
+    </div>
+    
+    <div>
+      <%= f.label :image_url, "URL Зображення", class: "block text-sm font-medium text-gray-400 mb-2" %>
+      <%= f.text_field :image_url, class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100", placeholder: "http://example.com/image.jpg" %>
+    </div>
+
+    <div class="pt-2">
+      <%= f.label :category_id, "Категорія", class: "block text-sm font-medium text-gray-400 mb-2" %>
+      
+      <div id="existing-category-section">
+        <%# Використовуємо @categories, який повинен бути встановлений у ProductsController#new %>
+        <%= f.collection_select :category_id, @categories, :id, :name, 
+                                    { prompt: "Оберіть існуючу категорію" },
+                                    class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100" %>
+      </div>
+
+      <div class="mt-3 flex items-center">
+        <input type="checkbox" id="toggle_new_category" class="h-4 w-4 text-yellow-500 border-gray-300 rounded focus:ring-yellow-500">
+        <label for="toggle_new_category" class="ml-2 block text-sm text-gray-400">Створити нову категорію</label>
+      </div>
+
+      <div id="new-category-section" class="mt-3 hidden">
+        <%# Використовуємо label_tag/text_field_tag, оскільки це поле не належить моделі %>
+        <%= label_tag :new_category_name, "Назва нової категорії", class: "block text-sm font-medium text-gray-400 mb-2" %> 
+        
+        <%= text_field_tag :new_category_name, nil, 
+                           class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100",
+                           placeholder: "Введіть назву нової категорії" %>
+      </div>
+    </div>
+
+    <div class="flex justify-end pt-4">
+      <%= f.submit "Створити товар", class: "bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-yellow-500 transition duration-300 cursor-pointer" %>
+    </div>
+    
+  <% end %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleCheckbox = document.getElementById('toggle_new_category');
+      const existingSection = document.getElementById('existing-category-section');
+      const newSection = document.getElementById('new-category-section');
+      
+      const categorySelect = existingSection.querySelector('select');
+      const newCategoryInput = newSection.querySelector('input[type="text"]');
+      
+      if (toggleCheckbox && existingSection && newSection && categorySelect && newCategoryInput) {
+        toggleCheckbox.addEventListener('change', function() {
+          if (this.checked) {
+            // Створення нової
+            existingSection.classList.add('hidden');
+            newSection.classList.remove('hidden');
+            
+            categorySelect.value = '';
+            categorySelect.removeAttribute('required');
+            newCategoryInput.setAttribute('required', 'required');
+          } else {
+            // Вибір існуючої
+            existingSection.classList.remove('hidden');
+            newSection.classList.add('hidden');
+            
+            newCategoryInput.value = '';
+            newCategoryInput.removeAttribute('required');
+            // categorySelect.setAttribute('required', 'required'); // Якщо потрібно зробити обов'язковим
+          }
+        });
+      }
+    });
+  </script>
+
+</div>

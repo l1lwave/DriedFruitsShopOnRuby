@@ -2,14 +2,12 @@
 
 one:
   user: one
-  product: one
-  product_count: 1
-  address: MyText
+  total_price: 9.99
   status: MyString
+  address: MyText
 
 two:
   user: two
-  product: two
-  product_count: 1
-  address: MyText
+  total_price: 9.99
   status: MyString
+  address: MyText

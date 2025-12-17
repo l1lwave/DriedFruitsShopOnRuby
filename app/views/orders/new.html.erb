@@ -1,25 +1,115 @@
-<h2 class="text-2xl font-bold text-yellow-400 mb-6 fade-in">Оформлення замовлення</h2>
+<div class="max-w-xl mx-auto py-10 fade-in">
+  <h2 class="text-3xl font-extrabold text-yellow-400 mb-8 text-center">Оформлення замовлення</h2>
 
-<%= form_with model: @order, class: "space-y-4 fade-in" do |f| %>
-  <% if @product %>
-    <p class="text-gray-300">Товар: <strong><%= @product.name %></strong></p>
-    <%= f.hidden_field :product_id, value: @product.id %>
+  <% if @cart.line_items.empty? %>
+    <div class="text-center p-10 bg-gray-800 rounded-lg shadow-xl">
+      <p class="text-gray-400 text-lg">Ваш кошик порожній. Перейдіть до каталогу, щоб додати товари.</p>
+      <%= link_to "До каталогу", products_path, class: "mt-4 inline-block text-yellow-400 hover:text-yellow-500" %>
+    </div>
+  <% elsif !logged_in? %>
+    <div class="text-center p-10 bg-gray-800 rounded-lg shadow-xl">
+      <p class="text-red-400 text-lg mb-4">Для оформлення замовлення необхідно увійти або зареєструватися.</p>
+      <%= link_to "Увійти / Зареєструватися", login_path, class: "mt-4 inline-block bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-lg hover:bg-yellow-500" %>
+    </div>
   <% else %>
-    <div>
-      <%= f.label :product_id, "Товар", class: "block text-gray-300" %>
-      <%= f.collection_select :product_id, @products, :id, :name, {}, {class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400"} %>
+
+    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl">
+    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl">
+      <h3 class="text-xl font-semibold text-gray-200 mb-6 border-b border-gray-700 pb-2">Дані отримувача</h3>
+      
+      <%= form_with model: @order, class: "space-y-6", id: "checkout-form" do |f| %>
+        
+        <%# Контактні дані %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :full_name, "ПІБ", class: "block text-sm font-medium text-gray-300 mb-2" %>
+            <%= f.text_field :full_name, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 outline-none", placeholder: "Іванов Іван Іванович" %>
+          </div>
+          <div>
+            <%= f.label :phone, "Номер телефону", class: "block text-sm font-medium text-gray-300 mb-2" %>
+            <%= f.text_field :phone, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:ring-2 focus:ring-yellow-400 outline-none", placeholder: "+380...", oninput: "formatPhoneNumber(this)" %>
+          </div>
+        </div>
+
+        <%# Спосіб доставки %>
+        <div>
+          <%= f.label :delivery_method, "Спосіб доставки", class: "block text-sm font-medium text-gray-300 mb-2" %>
+          <%= f.select :delivery_method, 
+                [["Нова Пошта (Відділення)", "post"], ["Кур'єрська доставка", "courier"]], 
+                { prompt: "Оберіть варіант" }, 
+                { class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 outline-none focus:ring-2 focus:ring-yellow-400", 
+                  onchange: "toggleDeliveryFields(this.value)" } %>
+        </div>
+
+        <div>
+          <%= f.label :city, "Місто", class: "block text-sm font-medium text-gray-300 mb-2" %>
+          <%= f.text_field :city, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 outline-none focus:ring-2 focus:ring-yellow-400" %>
+        </div>
+
+        <%# Поле для відділення (приховане за замовчуванням) %>
+        <div id="post-office-field" class="hidden">
+          <%= f.label :post_office_number, "Номер відділення", class: "block text-sm font-medium text-gray-300 mb-2" %>
+          <%= f.text_field :post_office_number, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 outline-none focus:ring-2 focus:ring-yellow-400", placeholder: "№1" %>
+        </div>
+
+        <%# Поле для адреси кур'єра (приховане за замовчуванням) %>
+        <div id="courier-address-field" class="hidden">
+          <%= f.label :address, "Адреса (вулиця, будинок, кв)", class: "block text-sm font-medium text-gray-300 mb-2" %>
+          <%= f.text_area :address, rows: 2, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 outline-none focus:ring-2 focus:ring-yellow-400" %>
+        </div>
+
+        <%# Оплата %>
+        <div>
+          <%= f.label :payment_method, "Спосіб оплати", class: "block text-sm font-medium text-gray-300 mb-2" %>
+          <%= f.select :payment_method, 
+                [["Готівка / При отриманні", "cash"], ["Оплата картою", "card"]], 
+                { prompt: "Оберіть спосіб" }, 
+                { class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 outline-none focus:ring-2 focus:ring-yellow-400", 
+                  onchange: "toggleCardMenu(this.value)" } %>
+        </div>
+
+        <%# Меню карти (муляж) %>
+        <div id="card-details" class="hidden bg-gray-900 p-4 rounded-lg space-y-3 border border-gray-600">
+           <input type="text" placeholder="Номер карти (0000 0000 0000 0000)" class="w-full bg-gray-800 p-2 rounded text-sm">
+           <div class="flex space-x-2">
+             <input type="text" placeholder="ММ/РР" class="w-1/2 bg-gray-800 p-2 rounded text-sm">
+             <input type="password" placeholder="CVV" class="w-1/2 bg-gray-800 p-2 rounded text-sm">
+           </div>
+        </div>
+
+        <div>
+          <%= f.label :comment, "Побажання до замовлення", class: "block text-sm font-medium text-gray-300 mb-2" %>
+          <%= f.text_area :comment, rows: 2, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 outline-none focus:ring-2 focus:ring-yellow-400" %>
+        </div>
+
+        <div class="text-xl font-bold text-yellow-400 py-4 text-right">
+          До сплати: <%= number_to_currency(@cart.total_price, unit: "₴") %>
+        </div>
+
+        <%= f.submit "Підтвердити замовлення", class: "w-full bg-yellow-600 text-gray-900 font-bold px-6 py-4 rounded-lg hover:bg-yellow-500 transition duration-300 cursor-pointer shadow-lg" %>
+      <% end %>
     </div>
   <% end %>
+</div>
 
-  <div>
-    <%= f.label :product_count, "Кількість", class: "block text-gray-300" %>
-    <%= f.number_field :product_count, value: @order.product_count || 1, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
-  </div>
+<script>
+  function toggleDeliveryFields(method) {
+    const postField = document.getElementById('post-office-field');
+    const courierField = document.getElementById('courier-address-field');
+    
+    postField.classList.add('hidden');
+    courierField.classList.add('hidden');
 
-  <div>
-    <%= f.label :address, "Адреса доставки", class: "block text-gray-300" %>
-    <%= f.text_area :address, rows: 3, class: "w-full bg-gray-700 text-gray-100 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-yellow-400" %>
-  </div>
+    if (method === 'post') postField.classList.remove('hidden');
+    if (method === 'courier') courierField.classList.remove('hidden');
+  }
 
-  <%= f.submit "Підтвердити замовлення", class: "bg-yellow-400 text-gray-900 px-6 py-3 rounded-lg hover:bg-yellow-500 transition duration-300" %>
-<% end %>
+  function toggleCardMenu(method) {
+    const cardMenu = document.getElementById('card-details');
+    if (method === 'card') {
+      cardMenu.classList.remove('hidden');
+    } else {
+      cardMenu.classList.add('hidden');
+    }
+  }
+</script>

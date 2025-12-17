@@ -1,0 +1,102 @@
+<div class="max-w-4xl mx-auto py-10 px-4 text-gray-200">
+  <%= link_to "← Назад до списку", admin_orders_path, class: "text-gray-400 hover:text-white transition" %>
+
+  <div class="bg-gray-800 p-8 rounded-xl shadow-2xl mt-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-gray-700 pb-6">
+      <div>
+        <h2 class="text-3xl font-bold text-white">Замовлення #<%= @order.id %></h2>
+        <p class="text-gray-400 text-sm mt-1">Створено: <%= @order.created_at.strftime("%d.%m.%Y о %H:%M") %></p>
+      </div>
+      
+      <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
+        <p class="text-xs uppercase text-gray-500 font-bold mb-2 tracking-widest">Статус замовлення</p>
+        <%= form_with url: update_status_admin_order_path(@order), method: :patch, class: "flex gap-2" do |f| %>
+          <%= f.select :status, 
+                Order.statuses.keys.map { |k| [Order.statuses[k], k] }, 
+                { selected: @order.status }, 
+                { class: "bg-gray-800 text-sm p-2 rounded border border-gray-600 focus:border-yellow-400 outline-none" } %>
+          <%= f.submit "Оновити", class: "bg-yellow-600 px-4 py-2 rounded text-gray-900 font-bold hover:bg-yellow-500 cursor-pointer transition" %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 border-b border-gray-700 pb-6">
+      <%# Контактна інформація %>
+      <div class="space-y-3">
+        <h3 class="text-yellow-400 font-bold flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          Клієнт
+        </h3>
+        <div class="bg-gray-900/30 p-4 rounded-lg">
+          <p class="text-lg font-semibold"><%= @order.full_name %></p>
+          <p class="text-yellow-500 font-mono"><%= @order.phone %></p>
+          <p class="text-gray-400 text-sm"><%= @order.user.email %></p>
+        </div>
+      </div>
+
+      <%# Деталі доставки %>
+      <div class="space-y-3">
+        <h3 class="text-yellow-400 font-bold flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          </svg>
+          Доставка та оплата
+        </h3>
+        <div class="bg-gray-900/30 p-4 rounded-lg text-sm space-y-2">
+          <p><span class="text-gray-500">Метод:</span> <%= @order.delivery_method == 'post' ? '📦 Нова Пошта' : '🏠 Кур\'єр' %></p>
+          <p><span class="text-gray-500">Місто:</span> <%= @order.city %></p>
+          <p><span class="text-gray-500">Адреса/Відділення:</span> <%= @order.post_office_number.present? ? "Відділення №#{@order.post_office_number}" : @order.address %></p>
+          <p><span class="text-gray-500">Оплата:</span> <%= @order.payment_method == 'card' ? '💳 Карткою' : '💵 Готівка' %></p>
+        </div>
+      </div>
+    </div>
+
+    <%# Коментар до замовлення %>
+    <% if @order.comment.present? %>
+      <div class="mb-8 p-4 bg-yellow-900/20 border-l-4 border-yellow-600 rounded">
+        <h3 class="text-yellow-400 font-bold text-sm mb-1">Коментар клієнта:</h3>
+        <p class="text-gray-300 italic">"<%= @order.comment %>"</p>
+      </div>
+    <% end %>
+
+    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+      </svg>
+      Товари
+    </h3>
+    
+    <div class="bg-gray-900/50 rounded-lg overflow-hidden">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="text-gray-500 text-xs uppercase border-b border-gray-700">
+            <th class="p-4">Назва</th>
+            <th class="p-4 text-center">К-сть г</th>
+            <th class="p-4 text-right">Ціна</th>
+            <th class="p-4 text-right">Сума</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800">
+          <% @order.line_items.each do |item| %>
+            <tr>
+              <td class="p-4 font-medium"><%= item.product.name %></td>
+              <td class="p-4 text-center text-gray-400"><%= item.quantity %></td>
+              <td class="p-4 text-right text-gray-400"><%= number_to_currency(item.price, unit: "₴") %></td>
+              <td class="p-4 text-right font-mono text-white"><%= number_to_currency(item.price * item.quantity, unit: "₴") %></td>
+            </tr>
+          <% end %>
+        </tbody>
+        <tfoot>
+          <tr class="bg-gray-900/80">
+            <td colspan="3" class="p-4 text-right font-bold text-gray-400 uppercase text-xs tracking-widest">Загальна сума до сплати:</td>
+            <td class="p-4 text-right text-2xl font-bold text-yellow-400 whitespace-nowrap">
+              <%= number_to_currency(@order.total_price, unit: "₴") %>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>

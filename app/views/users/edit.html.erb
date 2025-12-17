@@ -1,0 +1,71 @@
+<div class="max-w-xl mx-auto py-10 fade-in">
+  <h1 class="text-4xl font-extrabold text-yellow-400 mb-8 text-center">Редагування Профілю</h1>
+
+  <%= form_with(model: @user, url: user_path(@user), method: :patch, class: "bg-gray-800 p-8 rounded-xl shadow-2xl") do |form| %>
+
+    <% if @user.errors.any? %>
+      <div class="bg-red-700 text-white p-4 rounded-lg mb-6">
+        <h2 class="font-bold mb-2"><%= pluralize(@user.errors.count, "помилка") %> завадили збереженню профілю:</h2>
+        <ul>
+          <% @user.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="mb-5">
+      <%= form.label :name, "Ім'я", class: "block text-sm font-medium text-gray-400 mb-2" %>
+      <%= form.text_field :name, 
+                          class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100",
+                          placeholder: "Ваше ім'я" %>
+    </div>
+
+    <div class="mb-5">
+      <%= form.label :email, "Електронна пошта", class: "block text-sm font-medium text-gray-400 mb-2" %>
+      <%= form.email_field :email, 
+                            class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100",
+                            placeholder: "your.email@example.com" %>
+    </div>
+
+    <div class="border-t border-gray-700 pt-6 mt-6">
+      <p class="text-md font-semibold text-yellow-400 mb-4">Зміна пароля (залиште порожнім, якщо не хочете змінювати)</p>
+    
+      <div class="mb-5">
+        <%= form.label :password, "Новий пароль", class: "block text-sm font-medium text-gray-400 mb-2" %>
+        <%= form.password_field :password, 
+                                 class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100",
+                                 placeholder: "Новий пароль" %>
+      </div>
+
+      <div class="mb-6">
+        <%= form.label :password_confirmation, "Підтвердження пароля", class: "block text-sm font-medium text-gray-400 mb-2" %>
+        <%= form.password_field :password_confirmation, 
+                                 class: "w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-yellow-500 focus:border-yellow-500 text-gray-100",
+                                 placeholder: "Повторіть новий пароль" %>
+      </div>
+    </div>
+    
+  <div class="flex justify-end">
+    <%= form.submit "Зберегти зміни", class: "bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-lg shadow-lg hover:bg-yellow-500 transition duration-300 cursor-pointer" %>
+  </div>
+
+<% end %> 
+
+<div class="flex justify-between items-center border-t border-gray-700 pt-6 mt-6">
+  
+  <div class="flex-shrink-0">
+    <%= button_to "Вийти з акаунту", logout_path, method: :delete, 
+                data: { turbo_confirm: 'Ви впевнені, що хочете вийти?' },
+                class: "text-red-500 hover:text-red-400 transition duration-300 text-sm font-medium p-0 bg-transparent shadow-none" %> 
+  </div>
+
+  <div class="flex space-x-4 items-center">
+    
+    <%= link_to 'Скасувати та повернутися', root_path, 
+                class: "text-gray-500 hover:text-yellow-400 transition duration-300 text-sm font-medium" %>
+
+  </div>
+</div>
+
+</div>
