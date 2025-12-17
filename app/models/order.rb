@@ -5,7 +5,6 @@ class Order < ApplicationRecord
   has_many :products, through: :line_items
   has_many :line_items, dependent: :destroy
 
-  # 🌟 ВИПРАВЛЕНО: Новий синтаксис enum для Rails 7+ 🌟
   enum :status, {
     pending: "В обробці",
     paid: "Оплачено",

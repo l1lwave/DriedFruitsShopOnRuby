@@ -81,7 +81,6 @@ class ProductsController < ApplicationController
 
   # DELETE /products/:id
   def destroy
-    # 🌟 ВИПРАВЛЕННЯ: Коректне розміщення rescue 🌟
     if @product.destroy
       redirect_to products_path, notice: "Товар '#{@product.name}' успішно видалено."
     else

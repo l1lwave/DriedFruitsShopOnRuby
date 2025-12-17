@@ -30,10 +30,10 @@ class SessionsController < ApplicationController
 
   def merge_carts(user)
     guest_cart = Cart.find_by(id: session[:cart_id])
-    user_cart = user.cart # Припускаємо, що у User є has_one :cart
+    user_cart = user.cart
 
     if guest_cart
-      if user_cart # 1. Злиття: Кошик Гостя + Кошик Користувача
+      if user_cart
         guest_cart.line_items.each do |guest_item|
           existing_item = user_cart.line_items.find_by(product: guest_item.product)
 
@@ -54,12 +54,10 @@ class SessionsController < ApplicationController
         user_cart = guest_cart
       end
 
-      # Оновлюємо сесію ID на фінальний ID кошика користувача
       session[:cart_id] = user_cart.id
 
     elsif user_cart # 3. Кошик Гостя порожній, просто використовуємо кошик користувача
         session[:cart_id] = user_cart.id
     end
-    # Якщо нічого немає, current_cart створить новий кошик, коли він знадобиться
   end
 end

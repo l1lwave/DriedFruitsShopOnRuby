@@ -1,5 +1,4 @@
 class UsersController < ApplicationController
-  # 🌟 Примітка: Використовуємо :set_user для всіх дій, які працюють з конкретним користувачем
   before_action :set_user, only: [ :show, :edit, :update, :destroy ]
 
   # 1. Забезпечує, що користувач авторизований для всіх дій
@@ -67,7 +66,7 @@ class UsersController < ApplicationController
 
   private
 
-  # 🌟 ВИПРАВЛЕНИЙ set_user: Використовує ID з параметрів
+  # set_user: Використовує ID з параметрів
   def set_user
     @user = User.find(params[:id])
   rescue ActiveRecord::RecordNotFound
@@ -82,7 +81,7 @@ class UsersController < ApplicationController
     end
   end
 
-  # Використовуйте цей метод у вашому ApplicationController (якщо його там немає)
+  # Використовуйте цей метод у вашому ApplicationController
   def current_user
     @current_user ||= User.find_by(id: session[:user_id])
   end
